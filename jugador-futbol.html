@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jugador de Fútbol - Test</title>
+<style>
+  :root{
+    --pitch-dark:#0B3D2E;
+    --pitch-darker:#082A20;
+    --paper:#EFE7D6;
+    --gold:#D4AF37;
+    --gold-light:#F0D77B;
+    --red:#E63946;
+    --ink:#16211C;
+    --navy:#0D1B2A;
+    --line:rgba(239,231,214,0.18);
+
+    --card-bg:#101317;
+    --card-bg-2:#181D22;
+    --card-edge:#2A3138;
+    --emerald:#1FBF80;
+    --emerald-light:#5FE3AD;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    height:100%;
+    font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 15% -10%, rgba(212,175,55,0.16), transparent 45%),
+      radial-gradient(circle at 90% 0%, rgba(212,175,55,0.10), transparent 40%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 90px),
+      linear-gradient(180deg, var(--pitch-dark), var(--pitch-darker));
+    color:var(--paper);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  .scoreboard-font{
+    font-family:'Courier New', Courier, monospace;
+    letter-spacing:2px;
+  }
+
+  #app{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:480px;
+  }
+
+  /* ---------- START SCREEN ---------- */
+  .start-screen{
+    text-align:center;
+    padding:10px 4px;
+  }
+
+  .kicker{
+    display:inline-block;
+    font-family:'Courier New', monospace;
+    letter-spacing:4px;
+    font-size:12px;
+    color:var(--gold-light);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 16px;
+    margin-bottom:26px;
+    background:rgba(212,175,55,0.08);
+  }
+
+  .ball-line{
+    font-size:34px;
+    margin-bottom:10px;
+    letter-spacing:6px;
+  }
+
+  h1.title{
+    font-family:'Arial Black', Impact, 'Segoe UI', sans-serif;
+    font-size:38px;
+    line-height:1.08;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:14px;
+    text-shadow:0 2px 0 rgba(0,0,0,0.35);
+  }
+
+  .title .accent{
+    color:var(--gold);
+  }
+
+  .subtitle{
+    font-size:15px;
+    color:rgba(239,231,214,0.75);
+    max-width:340px;
+    margin:0 auto 34px auto;
+    line-height:1.5;
+  }
+
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Arial Black', Impact, 'Segoe UI', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font-size:16px;
+    padding:16px 40px;
+    border-radius:10px;
+    background:linear-gradient(180deg, var(--gold-light), var(--gold));
+    color:var(--navy);
+    box-shadow:0 6px 0 #8a6d1f, 0 10px 18px rgba(0,0,0,0.35);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{
+    transform:translateY(4px);
+    box-shadow:0 2px 0 #8a6d1f, 0 6px 10px rgba(0,0,0,0.3);
+  }
+
+  .start-footnote{
+    margin-top:22px;
+    font-size:11px;
+    color:rgba(239,231,214,0.45);
+    letter-spacing:1px;
+  }
+
+  /* ---------- QUIZ SCREEN ---------- */
+  .scoreboard-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+    font-size:13px;
+    color:var(--gold-light);
+  }
+
+  .progress-track{
+    flex:1;
+    height:8px;
+    background:rgba(239,231,214,0.12);
+    border-radius:4px;
+    margin:0 12px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--gold), var(--red));
+    border-radius:4px;
+    transition:width .35s ease;
+  }
+
+  .question-card{
+    background:rgba(239,231,214,0.06);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 20px;
+    backdrop-filter:blur(2px);
+  }
+
+  .q-eyebrow{
+    font-size:11px;
+    letter-spacing:3px;
+    color:var(--gold-light);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+
+  .q-text{
+    font-family:'Arial Black', Impact, 'Segoe UI', sans-serif;
+    font-size:21px;
+    line-height:1.3;
+    margin-bottom:22px;
+    text-transform:uppercase;
+  }
+
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .option-btn{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    text-align:left;
+    background:rgba(13,27,42,0.55);
+    border:1px solid var(--line);
+    color:var(--paper);
+    padding:16px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:17.5px;
+    line-height:1.4;
+    transition:background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .option-btn:hover{
+    background:rgba(212,175,55,0.14);
+    border-color:var(--gold);
+  }
+  .option-btn:active{
+    transform:scale(0.98);
+  }
+
+  .opt-num{
+    flex:0 0 auto;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:1px solid var(--gold);
+    color:var(--gold-light);
+    font-family:'Courier New', monospace;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ============================================================
+     RESULT SCREEN — TARJETA DE JUGADOR ESTILO VIDEOJUEGO (FUT-like)
+  ============================================================ */
+  .result-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .player-card{
+    position:relative;
+    width:100%;
+    max-width:340px;
+    background:
+      linear-gradient(160deg, var(--card-bg-2) 0%, var(--card-bg) 55%, #0A0C0E 100%);
+    border-radius:22px;
+    padding:20px 18px 24px 18px;
+    border:1px solid var(--card-edge);
+    box-shadow:
+      0 0 0 1px rgba(212,175,55,0.15),
+      0 25px 50px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+    overflow:hidden;
+  }
+
+  .player-card::before{
+    content:"";
+    position:absolute;
+    top:-40%; right:-30%;
+    width:70%; height:180%;
+    background:linear-gradient(180deg, rgba(212,175,55,0.10), transparent 60%);
+    transform:rotate(18deg);
+    pointer-events:none;
+  }
+
+  .card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    position:relative;
+    z-index:2;
+    margin-bottom:6px;
+  }
+
+  .card-rating-block{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    line-height:1;
+  }
+  .card-rating{
+    font-family:'Arial Black', Impact, sans-serif;
+    font-size:38px;
+    color:var(--gold-light);
+    text-shadow:0 2px 6px rgba(0,0,0,0.5);
+  }
+  .card-position{
+    font-family:'Arial Black', Impact, sans-serif;
+    font-size:15px;
+    letter-spacing:1px;
+    color:var(--paper);
+    margin-top:2px;
+  }
+  .card-position-full{
+    font-size:10px;
+    color:rgba(239,231,214,0.55);
+    letter-spacing:0.5px;
+    margin-top:1px;
+    text-align:center;
+    max-width:80px;
+  }
+
+  .card-nationality{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .flag{
+    font-size:26px;
+    line-height:1;
+  }
+  .nation-name{
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:rgba(239,231,214,0.6);
+  }
+
+  .card-photo-frame{
+    position:relative;
+    z-index:2;
+    width:100%;
+    height:190px;
+    margin:6px 0 10px 0;
+    border-radius:14px;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(212,175,55,0.14), transparent 65%),
+      linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.0));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.05);
+  }
+  .card-photo{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .img-fallback{
+    display:none;
+    width:100%;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0 16px;
+    font-size:13px;
+    color:rgba(239,231,214,0.5);
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 10px, rgba(255,255,255,0.045) 10px 20px);
+  }
+
+  .card-name{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    font-family:'Arial Black', Impact, 'Segoe UI', sans-serif;
+    font-size:21px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:#fff;
+    margin-bottom:2px;
+  }
+
+  .card-tagline{
+    text-align:center;
+    font-size:12px;
+    font-style:italic;
+    color:var(--gold-light);
+    margin-bottom:14px;
+  }
+
+  .compat-ribbon{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:linear-gradient(90deg, rgba(31,191,128,0.15), rgba(212,175,55,0.15));
+    border:1px solid rgba(95,227,173,0.35);
+    border-radius:10px;
+    padding:9px 12px;
+    margin-bottom:16px;
+  }
+  .compat-ribbon .num{
+    font-family:'Courier New', monospace;
+    font-weight:bold;
+    font-size:20px;
+    color:var(--emerald-light);
+  }
+  .compat-ribbon .txt{
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:rgba(239,231,214,0.8);
+  }
+
+  .stats-grid{
+    position:relative;
+    z-index:2;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 16px;
+    margin-bottom:16px;
+  }
+  .stat-row{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .stat-top{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    letter-spacing:1px;
+    color:rgba(239,231,214,0.65);
+    text-transform:uppercase;
+  }
+  .stat-top b{
+    color:var(--gold-light);
+    font-size:12px;
+  }
+  .stat-track{
+    height:6px;
+    border-radius:3px;
+    background:rgba(255,255,255,0.08);
+    overflow:hidden;
+  }
+  .stat-fill{
+    height:100%;
+    border-radius:3px;
+    background:linear-gradient(90deg, var(--emerald), var(--gold-light));
+  }
+
+  .card-desc{
+    position:relative;
+    z-index:2;
+    font-size:13px;
+    line-height:1.55;
+    color:rgba(239,231,214,0.85);
+    background:rgba(255,255,255,0.04);
+    border-left:3px solid var(--emerald);
+    padding:10px 12px;
+    border-radius:0 8px 8px 0;
+  }
+
+  .result-actions{
+    margin-top:22px;
+  }
+
+  .center{ text-align:center; }
+
+  @media (max-width:380px){
+    h1.title{ font-size:30px; }
+    .q-text{ font-size:18px; }
+    .card-photo-frame{ height:160px; }
+    .card-rating{ font-size:32px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   DATOS DE JUGADORES
+   Cada jugador tiene: name, image, nationality, position,
+   rating, pace, shooting, passing, dribbling, defending,
+   physical, description
+========================================================= */
+const players = {
+  messi: {
+    name:"Lionel Messi", image:"images/messi.png",
+    nationality:"Argentina", flag:"🇦🇷",
+    position:"DEL", positionFull:"Delantero / Extremo",
+    rating:93, pace:85, shooting:89, passing:91, dribbling:96, defending:34, physical:65,
+    tag:"El Zurdo Mágico",
+    description:"Tu fútbol nace de la calle: gambeta corta, cambios de ritmo y una calma absoluta cerca del área. No necesitás gritar para liderar, alcanza con la pelota en los pies."
+  },
+  cr7: {
+    name:"Cristiano Ronaldo", image:"images/ronaldo.png",
+    nationality:"Portugal", flag:"🇵🇹",
+    position:"DEL", positionFull:"Delantero Centro",
+    rating:91, pace:84, shooting:93, passing:78, dribbling:85, defending:32, physical:75,
+    tag:"La Máquina Implacable",
+    description:"Ambición sin techo. Trabajás tu físico como un arma, definís con una frialdad total y cada partido es una nueva oportunidad de dejar huella."
+  },
+  mbappe: {
+    name:"Kylian Mbappé", image:"images/mbappe.png",
+    nationality:"Francia", flag:"🇫🇷",
+    position:"DEL", positionFull:"Delantero / Extremo",
+    rating:91, pace:97, shooting:89, passing:80, dribbling:92, defending:36, physical:76,
+    tag:"El Rayo",
+    description:"Explosividad pura. En tres pasos ya rompiste la línea defensiva y tu definición es tan rápida como tu carrera. Nadie te controla el ritmo."
+  },
+  haaland: {
+    name:"Erling Haaland", image:"images/haaland.png",
+    nationality:"Noruega", flag:"🇳🇴",
+    position:"DEL", positionFull:"Delantero Centro",
+    rating:91, pace:89, shooting:93, passing:65, dribbling:80, defending:45, physical:88,
+    tag:"El Killer Escandinavo",
+    description:"Potencia, altura y hambre de gol. No hacés jueguito, hacés goles. Un solo toque te alcanza para definir y dejar al arquero pensando."
+  },
+  neymar: {
+    name:"Neymar Jr.", image:"images/neymar.png",
+    nationality:"Brasil", flag:"🇧🇷",
+    position:"EXT", positionFull:"Extremo Izquierdo",
+    rating:89, pace:85, shooting:83, passing:86, dribbling:93, defending:30, physical:60,
+    tag:"El Artista",
+    description:"Jugás con alegría y con estilo propio. Tu técnica y tu carisma están para desequilibrar solo, y cada gambeta lleva tu firma personal."
+  },
+  julian: {
+    name:"Julián Álvarez", image:"images/julian.png",
+    nationality:"Argentina", flag:"🇦🇷",
+    position:"DEL", positionFull:"Delantero / Segunda Punta",
+    rating:86, pace:82, shooting:84, passing:79, dribbling:85, defending:40, physical:72,
+    tag:"La Araña",
+    description:"Movilidad constante, sacrificio y un olfato goleador que aparece justo cuando el equipo lo necesita. Trabajás en silencio y definís en el momento justo."
+  },
+  debruyne: {
+    name:"Kevin De Bruyne", image:"images/debruyne.png",
+    nationality:"Bélgica", flag:"🇧🇪",
+    position:"MC", positionFull:"Mediocampista Ofensivo",
+    rating:91, pace:74, shooting:86, passing:93, dribbling:87, defending:64, physical:78,
+    tag:"El Cerebro",
+    description:"Ves el partido un paso antes que el resto. Tu pierna hábil reparte asistencias milimétricas y tu visión de juego arma equipos enteros."
+  },
+  rodri: {
+    name:"Rodri", image:"images/rodri.png",
+    nationality:"España", flag:"🇪🇸",
+    position:"MCD", positionFull:"Mediocampista Defensivo",
+    rating:90, pace:61, shooting:72, passing:88, dribbling:80, defending:86, physical:82,
+    tag:"El Metrónomo",
+    description:"El equipo se ordena a tu alrededor. Sos el que recupera, reparte y no se pone nervioso nunca. Sin vos, no hay ritmo posible."
+  },
+  vinicius: {
+    name:"Vinícius Jr.", image:"images/vini.png",
+    nationality:"Brasil", flag:"🇧🇷",
+    position:"EXT", positionFull:"Extremo Izquierdo",
+    rating:90, pace:95, shooting:82, passing:78, dribbling:92, defending:29, physical:68,
+    tag:"El Encarador",
+    description:"Personalidad, velocidad y ganas de arriesgar en cada jugada. Encarás una y otra vez sin miedo a errar, porque sabés que la próxima entra."
+  },
+  bellingham: {
+    name:"Jude Bellingham", image:"images/bellingham.png",
+    nationality:"Inglaterra", flag:"🏴",
+    position:"MC", positionFull:"Mediocampista / Llegador",
+    rating:89, pace:80, shooting:84, passing:84, dribbling:87, defending:68, physical:82,
+    tag:"El Todoterreno",
+    description:"Llegás desde atrás como nadie, tenés técnica, gol y una ambición que no para de crecer. Sos joven pero jugás como si ya lo hubieras ganado todo."
+  },
+  vandijk: {
+    name:"Virgil van Dijk", image:"images/vandijk.png",
+    nationality:"Países Bajos", flag:"🇳🇱",
+    position:"DFC", positionFull:"Defensor Central",
+    rating:90, pace:78, shooting:60, passing:71, dribbling:72, defending:92, physical:86,
+    tag:"La Muralla",
+    description:"Altura, lectura de juego y un liderazgo silencioso desde el fondo. Cortás todo antes de que empiece y ordenás al equipo con una mirada."
+  },
+  dibu: {
+    name:"Emiliano 'Dibu' Martínez", image:"images/dibu.png",
+    nationality:"Argentina", flag:"🇦🇷",
+    position:"POR", positionFull:"Arquero",
+    rating:87, pace:52, shooting:35, passing:58, dribbling:45, defending:88, physical:80,
+    tag:"El Loco Bajo los Tres Palos",
+    description:"Reflejos, carácter y una confianza que se contagia. Sos el último en fallar y el primero en meterle presión psicológica al rival."
+  }
+};
+
+/* =========================================================
+   PREGUNTAS (10) — posición, velocidad, técnica, fuerza,
+   visión, definición, personalidad, pierna hábil, altura,
+   estilo de juego
+========================================================= */
+const questions = [
+  {
+    q:"¿En qué posición te sentís más cómodo dentro de la cancha?",
+    options:[
+      { text:"Delantero centro, el que define adentro del área.", scores:{cr7:3, haaland:3, julian:2} },
+      { text:"Extremo veloz que desequilibra por afuera.", scores:{messi:2, mbappe:3, neymar:3, vinicius:3} },
+      { text:"Mediocampista que organiza y reparte juego.", scores:{debruyne:3, bellingham:2, messi:1} },
+      { text:"Mediocampista de contención, el que recupera.", scores:{rodri:3, vandijk:1} },
+      { text:"Defensor central o arquero, la última línea.", scores:{vandijk:3, dibu:3} }
+    ]
+  },
+  {
+    q:"¿Cómo describirías tu velocidad?",
+    options:[
+      { text:"Pura explosión, nadie me alcanza en velocidad punta.", scores:{mbappe:3, vinicius:3, haaland:2} },
+      { text:"Rápido, pero siempre con la pelota controlada.", scores:{messi:2, neymar:3, julian:2} },
+      { text:"Buen ritmo, pero no es mi arma principal.", scores:{debruyne:2, bellingham:2, cr7:2} },
+      { text:"No dependo de la velocidad, leo el juego antes.", scores:{rodri:3, vandijk:3, dibu:2} }
+    ]
+  },
+  {
+    q:"¿Cómo es tu técnica con la pelota?",
+    options:[
+      { text:"Gambeta corta y jugadas que parecen imposibles.", scores:{messi:3, neymar:3, vinicius:2} },
+      { text:"Técnica depurada para pases precisos y quirúrgicos.", scores:{debruyne:3, bellingham:2} },
+      { text:"Efectiva y directa, sin adornos innecesarios.", scores:{haaland:3, cr7:2, julian:2} },
+      { text:"Sólida, pero pensada más para defender que atacar.", scores:{vandijk:3, rodri:2} },
+      { text:"Reflejos y técnica bajo los tres palos.", scores:{dibu:3} }
+    ]
+  },
+  {
+    q:"¿Qué tanto pesa la fuerza física en tu juego?",
+    options:[
+      { text:"Domino todos los duelos, mi físico es un arma.", scores:{haaland:3, vandijk:3, cr7:2} },
+      { text:"Soy fuerte en el mano a mano, uno contra uno.", scores:{mbappe:2, vinicius:2, julian:2} },
+      { text:"Uso más la inteligencia que la fuerza bruta.", scores:{messi:3, debruyne:2, rodri:2} },
+      { text:"Mi fuerza es mental, no física.", scores:{neymar:2, bellingham:2, dibu:2} }
+    ]
+  },
+  {
+    q:"¿Cómo es tu visión de juego?",
+    options:[
+      { text:"Veo el pase antes de que se abra el espacio.", scores:{debruyne:3, messi:2, rodri:2} },
+      { text:"Prefiero resolver la jugada yo mismo.", scores:{neymar:3, vinicius:2, mbappe:2} },
+      { text:"Organizo al equipo entero desde el fondo.", scores:{vandijk:3, rodri:2} },
+      { text:"Leo el partido para no arriesgar de más.", scores:{dibu:2, vandijk:2, rodri:2} },
+      { text:"Encuentro espacios de gol que otros no ven.", scores:{haaland:2, julian:3, cr7:2} }
+    ]
+  },
+  {
+    q:"Frente al arco, ¿cómo definís?",
+    options:[
+      { text:"Con una frialdad absoluta, casi sin errar.", scores:{cr7:3, haaland:3, julian:2} },
+      { text:"Con clase, buscando el gol de categoría.", scores:{messi:3, neymar:2} },
+      { text:"Con potencia, reviento el arco.", scores:{haaland:2, mbappe:2, vandijk:1} },
+      { text:"No suelo definir yo, doy el último pase.", scores:{debruyne:3, bellingham:2} },
+      { text:"Yo evito los goles, no los hago.", scores:{dibu:3, vandijk:2} }
+    ]
+  },
+  {
+    q:"¿Cómo es tu personalidad dentro de la cancha?",
+    options:[
+      { text:"Líder silencioso, doy el ejemplo con actitud.", scores:{vandijk:3, rodri:2} },
+      { text:"Carismático, me gusta tener el foco encima.", scores:{neymar:3, cr7:3, mbappe:2} },
+      { text:"Tranquilo, pero decisivo cuando hace falta.", scores:{messi:3, julian:2} },
+      { text:"Explosivo, con carácter fuerte y verborragia.", scores:{dibu:3, vinicius:2} },
+      { text:"Ambicioso, siempre quiero un poco más.", scores:{haaland:2, bellingham:2, cr7:2} }
+    ]
+  },
+  {
+    q:"¿Cuál es tu pierna hábil?",
+    options:[
+      { text:"Zurdo.", scores:{messi:3, vinicius:3, haaland:2} },
+      { text:"Diestro.", scores:{cr7:3, mbappe:2, julian:2, rodri:2, vandijk:2, bellingham:2, dibu:2} },
+      { text:"Ambidiestro, uso las dos por igual.", scores:{neymar:3, debruyne:2} }
+    ]
+  },
+  {
+    q:"¿Cómo es tu altura y presencia física?",
+    options:[
+      { text:"Bajito y ágil, se me hace difícil de marcar.", scores:{messi:3, julian:2} },
+      { text:"Estatura media, un buen equilibrio general.", scores:{neymar:2, vinicius:2, mbappe:2, bellingham:1} },
+      { text:"Alto, domino el juego aéreo.", scores:{haaland:3, vandijk:3, cr7:2} },
+      { text:"La altura justa para reinar bajo los tres palos.", scores:{dibu:2, rodri:1, debruyne:1} }
+    ]
+  },
+  {
+    q:"¿Cómo definirías tu estilo de juego?",
+    options:[
+      { text:"Individualista, prefiero resolver solo la jugada.", scores:{messi:2, neymar:3, vinicius:2} },
+      { text:"Colectivo, juego siempre pensando en el equipo.", scores:{debruyne:3, rodri:3} },
+      { text:"Directo al gol, sin vueltas ni adornos.", scores:{haaland:3, cr7:2, julian:2} },
+      { text:"Sacrificado, primero defiendo y después ataco.", scores:{vandijk:3, rodri:2, dibu:2} },
+      { text:"Con personalidad, encaro y arriesgo todo el tiempo.", scores:{vinicius:2, mbappe:2, bellingham:2} }
+    ]
+  }
+];
+
+/* =========================================================
+   ESTADO DEL JUEGO
+========================================================= */
+let currentQuestion = 0;
+let scores = {};
+const MAX_POINTS_PER_QUESTION = 3;
+const MAX_TOTAL_POINTS = questions.length * MAX_POINTS_PER_QUESTION;
+
+function initScores(){
+  scores = {};
+  Object.keys(players).forEach(key => { scores[key] = 0; });
+}
+
+/* =========================================================
+   RENDER: PANTALLA INICIAL
+========================================================= */
+function renderStart(){
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="wrap start-screen">
+      <span class="kicker scoreboard-font">10 PREGUNTAS · 1 RESULTADO</span>
+      <div class="ball-line">⚽ 🥅 ⚽</div>
+      <h1 class="title">¿Qué jugador <br> de <span class="accent">fútbol</span> sos?</h1>
+      <p class="subtitle">Respondé sobre tu posición, velocidad, técnica y estilo de juego,
+      y descubrí a qué crack del fútbol mundial te parecés.</p>
+      <button class="btn" onclick="startQuiz()">Empezar ▶</button>
+      <div class="start-footnote scoreboard-font">MESSI · CR7 · MBAPPÉ · HAALAND · NEYMAR · Y MÁS</div>
+    </div>
+  `;
+}
+
+function startQuiz(){
+  initScores();
+  currentQuestion = 0;
+  renderQuestion();
+}
+
+/* =========================================================
+   RENDER: PANTALLA DE PREGUNTA
+========================================================= */
+function renderQuestion(){
+  const app = document.getElementById("app");
+  const q = questions[currentQuestion];
+  const progressPct = Math.round((currentQuestion / questions.length) * 100);
+
+  const optionsHtml = q.options.map((opt, i) => `
+    <button class="option-btn" onclick="selectAnswer(${i})">
+      <span class="opt-num">${String(i + 1).padStart(2,"0")}</span>
+      <span>${opt.text}</span>
+    </button>
+  `).join("");
+
+  app.innerHTML = `
+    <div class="wrap">
+      <div class="scoreboard-bar scoreboard-font">
+        <span>PREG. ${String(currentQuestion + 1).padStart(2,"0")}/${questions.length}</span>
+        <div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+        <span>${progressPct}%</span>
+      </div>
+      <div class="question-card">
+        <div class="q-eyebrow">Pregunta ${currentQuestion + 1}</div>
+        <div class="q-text">${q.q}</div>
+        <div class="options">${optionsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   LÓGICA: SELECCIONAR RESPUESTA
+========================================================= */
+function selectAnswer(optionIndex){
+  const opt = questions[currentQuestion].options[optionIndex];
+  Object.keys(opt.scores).forEach(playerKey => {
+    scores[playerKey] += opt.scores[playerKey];
+  });
+
+  currentQuestion++;
+
+  if (currentQuestion < questions.length){
+    renderQuestion();
+  } else {
+    renderResult();
+  }
+}
+
+/* =========================================================
+   FUNCIÓN GLOBAL: manejar error de carga de imagen.
+   Si la imagen no existe en la carpeta /images, se muestra
+   un recuadro con el texto "Imagen no disponible" sin
+   romper el resto de la página.
+========================================================= */
+function handleImgError(imgEl){
+  imgEl.onerror = null;
+  imgEl.style.display = "none";
+  const fallback = imgEl.nextElementSibling;
+  if (fallback){ fallback.style.display = "flex"; }
+}
+
+/* =========================================================
+   RENDER: PANTALLA DE RESULTADO — TARJETA ESTILO VIDEOJUEGO
+========================================================= */
+function getWinner(){
+  let bestKey = null;
+  let bestScore = -1;
+  Object.keys(scores).forEach(key => {
+    if (scores[key] > bestScore){
+      bestScore = scores[key];
+      bestKey = key;
+    }
+  });
+  return { key: bestKey, score: bestScore };
+}
+
+function statRow(label, value){
+  return `
+    <div class="stat-row">
+      <div class="stat-top"><span>${label}</span><b>${value}</b></div>
+      <div class="stat-track"><div class="stat-fill" style="width:${value}%"></div></div>
+    </div>
+  `;
+}
+
+function renderResult(){
+  const app = document.getElementById("app");
+  const { key, score } = getWinner();
+  const p = players[key];
+
+  const rawPct = score / MAX_TOTAL_POINTS;
+  const compat = Math.min(99, Math.round(65 + rawPct * 34));
+
+  const statsHtml = [
+    statRow("Ritmo", p.pace),
+    statRow("Tiro", p.shooting),
+    statRow("Pase", p.passing),
+    statRow("Regate", p.dribbling),
+    statRow("Defensa", p.defending),
+    statRow("Físico", p.physical)
+  ].join("");
+
+  app.innerHTML = `
+    <div class="wrap result-wrap">
+      <div class="player-card">
+
+        <div class="card-header">
+          <div class="card-rating-block">
+            <div class="card-rating scoreboard-font">${p.rating}</div>
+            <div class="card-position">${p.position}</div>
+            <div class="card-position-full">${p.positionFull}</div>
+          </div>
+          <div class="card-nationality">
+            <span class="flag">${p.flag}</span>
+            <span class="nation-name">${p.nationality}</span>
+          </div>
+        </div>
+
+        <div class="card-photo-frame">
+          <img class="card-photo" src="${p.image}" alt="Foto de ${p.name}" onerror="handleImgError(this)">
+          <div class="img-fallback">Imagen no disponible</div>
+        </div>
+
+        <div class="card-name">${p.name}</div>
+        <div class="card-tagline">"${p.tag}"</div>
+
+        <div class="compat-ribbon">
+          <span class="num scoreboard-font">${compat}%</span>
+          <span class="txt">Compatibilidad con vos</span>
+        </div>
+
+        <div class="stats-grid">
+          ${statsHtml}
+        </div>
+
+        <p class="card-desc">${p.description}</p>
+
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" onclick="startQuiz()">🔁 Volver a jugar</button>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   INICIO
+========================================================= */
+window.onload = function(){
+  initScores();
+  renderStart();
+};
+</script>
+
+</body>
+</html>
